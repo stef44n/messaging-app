@@ -10,25 +10,48 @@ import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import Inbox from "./pages/Inbox";
 import Chat from "./pages/Chat";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Loader from "./components/Loader";
 
 function PrivateRoute({ children }) {
-    const token = localStorage.getItem("token");
+    const { token, loading } = useAuth();
+    if (loading) return <Loader />;
     return token ? children : <Navigate to="/login" />;
+}
+
+function RedirectIfAuth({ children }) {
+    const { token, loading } = useAuth();
+    if (loading) return <Loader />;
+    return token ? <Navigate to="/inbox" /> : children;
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
         <BrowserRouter>
-            {/* Wrap EVERYTHING in AuthProvider */}
             <AuthProvider>
                 <Navbar />
                 <Routes>
                     <Route path="/" element={<App />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
 
-                    {/* Protected Routes */}
+                    {/* Auth routes */}
+                    <Route
+                        path="/login"
+                        element={
+                            <RedirectIfAuth>
+                                <Login />
+                            </RedirectIfAuth>
+                        }
+                    />
+                    <Route
+                        path="/signup"
+                        element={
+                            <RedirectIfAuth>
+                                <Signup />
+                            </RedirectIfAuth>
+                        }
+                    />
+
+                    {/* Protected routes */}
                     <Route
                         path="/profile"
                         element={

@@ -35,7 +35,7 @@ export default function Navbar() {
                             <Link to="/profile" className="hover:underline">
                                 Profile
                             </Link>
-                            <Link to="/messages" className="hover:underline">
+                            <Link to="/inbox" className="hover:underline">
                                 Messages
                             </Link>
                             <button
@@ -106,7 +106,7 @@ export default function Navbar() {
                                 Profile
                             </Link>
                             <Link
-                                to="/messages"
+                                to="/inbox"
                                 className="block py-2 px-3 rounded hover:bg-blue-500"
                             >
                                 Messages

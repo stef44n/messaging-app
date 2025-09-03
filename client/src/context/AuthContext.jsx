@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem("token") || null);
+    const [loading, setLoading] = useState(true);
 
     // On initial load, fetch profile if token exists
     useEffect(() => {
@@ -21,27 +22,26 @@ export function AuthProvider({ children }) {
                     localStorage.removeItem("token");
                 }
             }
+            setLoading(false); // done checking
         };
         fetchUser();
     }, [token]);
 
-    // Called from Login.jsx
+    // Called after successful login
     const login = (token, user) => {
         setToken(token);
         localStorage.setItem("token", token);
-        if (user) {
-            setUser(user); // instantly update Navbar
-        }
+        if (user) setUser(user);
     };
 
     const logout = () => {
         setToken(null);
         setUser(null);
-        logoutService(); // clears localStorage
+        logoutService();
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout }}>
+        <AuthContext.Provider value={{ user, token, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );
