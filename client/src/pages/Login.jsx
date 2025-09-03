@@ -1,17 +1,24 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../services/auth";
+import { login as loginService } from "../services/auth";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
     const [form, setForm] = useState({ email: "", password: "" });
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { login } = useAuth(); // from AuthContext
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await login(form);
-            navigate("/inbox");
+            const data = await loginService(form); // your backend call
+            if (data.token) {
+                login(data.token, data.user); // pass both
+                navigate("/inbox"); // redirect
+            } else {
+                setError("No token returned from server");
+            }
         } catch (err) {
             setError(err.response?.data?.error || "Login failed");
         }

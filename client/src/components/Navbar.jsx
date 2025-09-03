@@ -1,12 +1,19 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        setIsLoggedIn(!!token);
+    }, []);
+
     const handleLogout = () => {
-        localStorage.removeItem("token"); // or however you're storing auth
+        localStorage.removeItem("token");
+        setIsLoggedIn(false);
         navigate("/login");
     };
 
@@ -23,18 +30,31 @@ export default function Navbar() {
                     <Link to="/" className="hover:underline">
                         Home
                     </Link>
-                    <Link to="/profile" className="hover:underline">
-                        Profile
-                    </Link>
-                    <Link to="/inbox" className="hover:underline">
-                        Messages
-                    </Link>
-                    <button
-                        onClick={handleLogout}
-                        className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
-                    >
-                        Logout
-                    </button>
+                    {isLoggedIn ? (
+                        <>
+                            <Link to="/profile" className="hover:underline">
+                                Profile
+                            </Link>
+                            <Link to="/messages" className="hover:underline">
+                                Messages
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
+                            >
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login" className="hover:underline">
+                                Login
+                            </Link>
+                            <Link to="/signup" className="hover:underline">
+                                Sign Up
+                            </Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -76,24 +96,44 @@ export default function Navbar() {
                     >
                         Home
                     </Link>
-                    <Link
-                        to="/profile"
-                        className="block py-2 px-3 rounded hover:bg-blue-500"
-                    >
-                        Profile
-                    </Link>
-                    <Link
-                        to="/inbox"
-                        className="block py-2 px-3 rounded hover:bg-blue-500"
-                    >
-                        Messages
-                    </Link>
-                    <button
-                        onClick={handleLogout}
-                        className="bg-red-500 px-3 py-2 rounded hover:bg-red-600 text-left"
-                    >
-                        Logout
-                    </button>
+
+                    {isLoggedIn ? (
+                        <>
+                            <Link
+                                to="/profile"
+                                className="block py-2 px-3 rounded hover:bg-blue-500"
+                            >
+                                Profile
+                            </Link>
+                            <Link
+                                to="/messages"
+                                className="block py-2 px-3 rounded hover:bg-blue-500"
+                            >
+                                Messages
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="bg-red-500 px-3 py-2 rounded hover:bg-red-600 text-left"
+                            >
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                to="/login"
+                                className="block py-2 px-3 rounded hover:bg-blue-500"
+                            >
+                                Login
+                            </Link>
+                            <Link
+                                to="/register"
+                                className="block py-2 px-3 rounded hover:bg-blue-500"
+                            >
+                                Register
+                            </Link>
+                        </>
+                    )}
                 </div>
             )}
         </nav>
