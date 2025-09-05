@@ -1,37 +1,33 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { token, user, logout } = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        setIsLoggedIn(!!token);
-    }, []);
-
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        setIsLoggedIn(false);
+        logout();
         navigate("/login");
     };
 
     return (
         <nav className="bg-blue-600 text-white px-6 py-3 shadow-md">
             <div className="max-w-6xl mx-auto flex items-center justify-between">
-                {/* Logo / Brand */}
                 <Link to="/" className="text-xl font-bold">
                     MessagingApp
                 </Link>
 
-                {/* Desktop Menu */}
-                <div className="hidden md:flex space-x-6">
+                <div className="hidden md:flex space-x-6 items-center">
                     <Link to="/" className="hover:underline">
                         Home
                     </Link>
-                    {isLoggedIn ? (
+                    {token ? (
                         <>
+                            <span className="font-medium">
+                                👋 Hi, {user?.username || "User"}
+                            </span>
                             <Link to="/profile" className="hover:underline">
                                 Profile
                             </Link>
@@ -97,7 +93,7 @@ export default function Navbar() {
                         Home
                     </Link>
 
-                    {isLoggedIn ? (
+                    {token ? (
                         <>
                             <Link
                                 to="/profile"
@@ -127,10 +123,10 @@ export default function Navbar() {
                                 Login
                             </Link>
                             <Link
-                                to="/register"
+                                to="/signup"
                                 className="block py-2 px-3 rounded hover:bg-blue-500"
                             >
-                                Register
+                                Sign Up
                             </Link>
                         </>
                     )}

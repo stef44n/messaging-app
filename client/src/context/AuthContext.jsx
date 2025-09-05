@@ -1,47 +1,42 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { getProfile, logout as logoutService } from "../services/auth";
+import { createContext, useContext, useState, useEffect } from "react";
+import {
+    getProfile,
+    login as apiLogin,
+    logout as apiLogout,
+} from "../services/auth";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+    const [token, setToken] = useState(localStorage.getItem("token"));
     const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem("token") || null);
-    const [loading, setLoading] = useState(true);
 
-    // On initial load, fetch profile if token exists
     useEffect(() => {
-        const fetchUser = async () => {
-            if (token) {
-                try {
-                    const data = await getProfile();
-                    setUser(data.user);
-                } catch (err) {
-                    console.error("Failed to fetch profile", err);
-                    setUser(null);
-                    setToken(null);
-                    localStorage.removeItem("token");
-                }
-            }
-            setLoading(false); // done checking
-        };
-        fetchUser();
+        if (token) {
+            getProfile()
+                .then((data) => setUser(data.user))
+                .catch(() => setUser(null));
+        } else {
+            setUser(null);
+        }
     }, [token]);
 
-    // Called after successful login
-    const login = (token, user) => {
-        setToken(token);
-        localStorage.setItem("token", token);
-        if (user) setUser(user);
+    const login = async (credentials) => {
+        const data = await apiLogin(credentials);
+        setToken(data.token);
+        localStorage.setItem("token", data.token);
+        const profile = await getProfile();
+        setUser(profile.user);
     };
 
     const logout = () => {
+        apiLogout();
         setToken(null);
         setUser(null);
-        logoutService();
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+        <AuthContext.Provider value={{ token, user, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

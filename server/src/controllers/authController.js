@@ -43,29 +43,40 @@ export const signup = async (req, res) => {
 // --- Login ---
 export const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        console.log("🔹 Login request body:", req.body);
+
+        const { email, password } = req.body || {};
+
+        if (!email || !password) {
+            console.log(
+                "⚠️ Missing email or password (likely StrictMode double render in dev)"
+            );
+            return res.status(400).json({ error: "Invalid email or password" });
+        }
+
+        console.log("✅ Login attempt with:", email);
 
         const user = await prisma.user.findUnique({ where: { email } });
+
         if (!user) {
             return res.status(400).json({ error: "Invalid email or password" });
         }
 
-        const validPassword = await bcrypt.compare(password, user.passwordHash);
-        if (!validPassword) {
+        const isMatch = await bcrypt.compare(password, user.passwordHash);
+        if (!isMatch) {
             return res.status(400).json({ error: "Invalid email or password" });
         }
 
-        const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
             expiresIn: "1h",
         });
 
         res.json({
-            message: "Login successful",
             token,
             user: { id: user.id, username: user.username, email: user.email },
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Login failed" });
+    } catch (err) {
+        console.error("❌ Login error:", err);
+        res.status(500).json({ error: "Server error during login" });
     }
 };

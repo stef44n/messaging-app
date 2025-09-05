@@ -8,9 +8,14 @@ export default function Login() {
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const { login } = useAuth(); // from AuthContext
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (loading) return; // guard
+        setLoading(true);
+
         try {
             const data = await loginService(form); // your backend call
             if (data.token) {
@@ -21,6 +26,8 @@ export default function Login() {
             }
         } catch (err) {
             setError(err.response?.data?.error || "Login failed");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -47,8 +54,12 @@ export default function Login() {
                     }
                     className="border p-2 rounded"
                 />
-                <button className="bg-blue-500 text-white p-2 rounded">
-                    Login
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-blue-500 text-white p-2 rounded"
+                >
+                    {loading ? "Logging in..." : "Login"}
                 </button>
             </form>
         </div>
