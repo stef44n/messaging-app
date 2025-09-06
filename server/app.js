@@ -4,16 +4,19 @@ import cors from "cors";
 import authRoutes from "./src/routes/authRoutes.js";
 import profileRoutes from "./src/routes/profileRoutes.js";
 import messageRoutes from "./src/routes/messageRoutes.js";
+import userRoutes from "./src/routes/userRoutes.js";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+// app.use(express.urlencoded({ extended: true })); // (optional, for form data)
 
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/", (req, res) => {
     res.send("Messaging App API running...");

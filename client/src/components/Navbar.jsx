@@ -31,6 +31,10 @@ export default function Navbar() {
                             <Link to="/profile" className="hover:underline">
                                 Profile
                             </Link>
+                            <Link to="/new-chat" className="hover:underline">
+                                New Chat
+                            </Link>
+
                             <Link to="/inbox" className="hover:underline">
                                 Messages
                             </Link>

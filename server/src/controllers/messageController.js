@@ -36,14 +36,8 @@ export const sendMessage = async (req, res) => {
             },
         });
 
-        // ✅ Just return the message object
-        res.status(201).json({
-            id: message.id,
-            body: message.body,
-            createdAt: message.createdAt,
-            sender: message.sender,
-            recipient: message.recipient,
-        });
+        // ✅ return the message object directly
+        res.status(201).json(message);
     } catch (error) {
         console.error("❌ sendMessage error:", error);
         res.status(500).json({ error: "Failed to send message" });

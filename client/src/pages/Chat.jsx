@@ -34,9 +34,10 @@ export default function Chat() {
         if (!input.trim()) return;
 
         try {
-            const newMessage = await sendMessage(userId, input); // returns message directly
+            const newMsg = await sendMessage(userId, input);
 
-            setMessages((prev) => [...prev, newMessage]); // no .data needed
+            setMessages((prev) => [...prev, newMsg]); // ✅ use returned message
+
             setInput("");
         } catch (err) {
             console.error("Failed to send message:", err);

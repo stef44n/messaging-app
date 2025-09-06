@@ -12,8 +12,8 @@ export const getConversation = async (userId) => {
     return res.data; // ✅ now directly the array
 };
 
-// ✉️ Send a new message
+// Send a message
 export const sendMessage = async (recipientId, body) => {
     const res = await api.post(`/messages/${recipientId}`, { body });
-    return res.data; // ✅ now returns the message object directly
+    return res.data; // ✅ now it's the message object
 };

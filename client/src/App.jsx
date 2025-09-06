@@ -12,6 +12,8 @@ export default function App() {
                 <Link to="/signup">Signup</Link>
                 <Link to="/profile">Profile</Link>
                 <Link to="/inbox">Inbox</Link>
+                <Link to="/new-chat">New chat</Link>
+
                 <button
                     onClick={() => {
                         logout();
