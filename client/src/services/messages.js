@@ -1,19 +1,19 @@
 import api from "./api";
 
-// Get inbox (list of conversations)
+// 📬 Get inbox (list of conversations)
 export const getInbox = async () => {
     const res = await api.get("/messages/inbox");
-    return res.data;
+    return res.data; // ✅ now directly the array
 };
 
-// Get conversation with a user
+// 💬 Get conversation with a user
 export const getConversation = async (userId) => {
     const res = await api.get(`/messages/${userId}`);
-    return res.data;
+    return res.data; // ✅ now directly the array
 };
 
-// Send a message
+// ✉️ Send a new message
 export const sendMessage = async (recipientId, body) => {
     const res = await api.post(`/messages/${recipientId}`, { body });
-    return res.data;
+    return res.data; // ✅ now returns the message object directly
 };

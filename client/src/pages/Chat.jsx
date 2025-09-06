@@ -1,52 +1,61 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getConversation, sendMessage } from "../services/messages";
+import { useAuth } from "../context/AuthContext";
 
 export default function Chat() {
-    const { userId } = useParams();
+    const { userId } = useParams(); // recipient’s id
+    const { user } = useAuth(); // current logged-in user
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
 
-    // Load conversation
+    // Fetch conversation
+    const fetchMessages = async () => {
+        try {
+            const data = await getConversation(userId);
+            setMessages(data || []); // now always an array
+            console.log(data);
+        } catch (err) {
+            console.error("Failed to fetch conversation:", err);
+            setMessages([]);
+        }
+    };
+
+    // Load messages on mount + poll every 5s
     useEffect(() => {
-        const fetchMessages = async () => {
-            try {
-                const data = await getConversation(userId);
-                setMessages(data.messages);
-            } catch (err) {
-                console.error(err);
-            }
-        };
         fetchMessages();
+        const interval = setInterval(fetchMessages, 5000);
+        return () => clearInterval(interval);
     }, [userId]);
 
     // Send new message
     const handleSend = async (e) => {
         e.preventDefault();
         if (!input.trim()) return;
+
         try {
-            await sendMessage(userId, input);
-            setMessages([
-                ...messages,
-                { body: input, senderId: "me", createdAt: new Date() },
-            ]);
+            const newMessage = await sendMessage(userId, input); // returns message directly
+
+            setMessages((prev) => [...prev, newMessage]); // no .data needed
             setInput("");
         } catch (err) {
-            console.error(err);
+            console.error("Failed to send message:", err);
         }
     };
 
     return (
         <div className="max-w-md mx-auto p-6 flex flex-col h-screen">
-            <h1 className="text-2xl font-bold mb-4">Chat</h1>
+            <h1 className="text-2xl font-bold mb-4">Chat with User {userId}</h1>
 
             <div className="flex-1 overflow-y-auto border p-3 rounded bg-gray-50 space-y-2">
-                {messages.length === 0 && <p>No messages yet.</p>}
-                {messages.map((msg, idx) => (
+                {(!messages || messages.length === 0) && (
+                    <p>No messages yet.</p>
+                )}
+                {messages.map((msg) => (
                     <div
-                        key={idx}
+                        key={msg.id}
                         className={`p-2 rounded max-w-xs ${
-                            msg.senderId === "me"
+                            msg.senderId === user?.id
                                 ? "bg-blue-500 text-white self-end ml-auto"
                                 : "bg-gray-200 text-black"
                         }`}

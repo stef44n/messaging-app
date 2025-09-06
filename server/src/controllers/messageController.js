@@ -2,21 +2,23 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Send a message
+// --- Send a message ---
 export const sendMessage = async (req, res) => {
     try {
-        const { recipientId } = req.params;
-        const { body } = req.body;
+        const recipientId = parseInt(req.params.recipientId, 10);
+        const body = (req.body.body || "").trim();
 
+        if (!recipientId || isNaN(recipientId)) {
+            return res.status(400).json({ error: "Invalid recipient ID" });
+        }
         if (!body) {
             return res
                 .status(400)
                 .json({ error: "Message body cannot be empty" });
         }
 
-        // Ensure recipient exists
         const recipient = await prisma.user.findUnique({
-            where: { id: parseInt(recipientId) },
+            where: { id: recipientId },
         });
         if (!recipient) {
             return res.status(404).json({ error: "Recipient not found" });
@@ -26,49 +28,61 @@ export const sendMessage = async (req, res) => {
             data: {
                 body,
                 senderId: req.user.userId,
-                recipientId: parseInt(recipientId),
+                recipientId,
+            },
+            include: {
+                sender: { select: { id: true, username: true } },
+                recipient: { select: { id: true, username: true } },
             },
         });
 
-        res.status(201).json({ message: "Message sent", data: message });
+        // ✅ Just return the message object
+        res.status(201).json({
+            id: message.id,
+            body: message.body,
+            createdAt: message.createdAt,
+            sender: message.sender,
+            recipient: message.recipient,
+        });
     } catch (error) {
-        console.error(error);
+        console.error("❌ sendMessage error:", error);
         res.status(500).json({ error: "Failed to send message" });
     }
 };
 
-// Get all messages between current user and another user
+// --- Get conversation with a user ---
 export const getConversation = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const userId = parseInt(req.params.userId, 10);
+        if (!userId || isNaN(userId)) {
+            return res.status(400).json({ error: "Invalid user ID" });
+        }
 
         const messages = await prisma.message.findMany({
             where: {
                 OR: [
-                    {
-                        senderId: req.user.userId,
-                        recipientId: parseInt(userId),
-                    },
-                    {
-                        senderId: parseInt(userId),
-                        recipientId: req.user.userId,
-                    },
+                    { senderId: req.user.userId, recipientId: userId },
+                    { senderId: userId, recipientId: req.user.userId },
                 ],
             },
             orderBy: { createdAt: "asc" },
+            include: {
+                sender: { select: { id: true, username: true } },
+                recipient: { select: { id: true, username: true } },
+            },
         });
 
-        res.json({ messages });
+        // ✅ return array directly
+        res.json(messages);
     } catch (error) {
-        console.error(error);
+        console.error("❌ getConversation error:", error);
         res.status(500).json({ error: "Failed to fetch conversation" });
     }
 };
 
-// Get a list of unique users the current user has messaged
+// --- Get inbox (list of conversations) ---
 export const getInbox = async (req, res) => {
     try {
-        // Get distinct conversations (either sent or received)
         const messages = await prisma.message.findMany({
             where: {
                 OR: [
@@ -83,11 +97,11 @@ export const getInbox = async (req, res) => {
             },
         });
 
-        // Build a unique set of conversation partners
         const conversations = {};
         messages.forEach((msg) => {
             const otherUser =
                 msg.senderId === req.user.userId ? msg.recipient : msg.sender;
+
             if (!conversations[otherUser.id]) {
                 conversations[otherUser.id] = {
                     user: otherUser,
@@ -97,9 +111,10 @@ export const getInbox = async (req, res) => {
             }
         });
 
-        res.json({ conversations: Object.values(conversations) });
+        // ✅ return array directly
+        res.json(Object.values(conversations));
     } catch (error) {
-        console.error(error);
+        console.error("❌ getInbox error:", error);
         res.status(500).json({ error: "Failed to fetch inbox" });
     }
 };
