@@ -48,10 +48,22 @@ export const sendMessage = async (req, res) => {
 export const getConversation = async (req, res) => {
     try {
         const userId = parseInt(req.params.userId, 10);
+
         if (!userId || isNaN(userId)) {
             return res.status(400).json({ error: "Invalid user ID" });
         }
 
+        // ✅ Mark all messages sent *to current user* as read
+        await prisma.message.updateMany({
+            where: {
+                senderId: userId,
+                recipientId: req.user.userId,
+                readAt: null,
+            },
+            data: { readAt: new Date() },
+        });
+
+        // Fetch updated conversation
         const messages = await prisma.message.findMany({
             where: {
                 OR: [
@@ -66,7 +78,6 @@ export const getConversation = async (req, res) => {
             },
         });
 
-        // ✅ return array directly
         res.json(messages);
     } catch (error) {
         console.error("❌ getConversation error:", error);
@@ -101,7 +112,13 @@ export const getInbox = async (req, res) => {
                     user: otherUser,
                     lastMessage: msg.body,
                     lastMessageAt: msg.createdAt,
+                    unreadCount: 0,
                 };
+            }
+
+            // ✅ Count unread messages addressed to current user
+            if (msg.recipientId === req.user.userId && !msg.readAt) {
+                conversations[otherUser.id].unreadCount += 1;
             }
         });
 

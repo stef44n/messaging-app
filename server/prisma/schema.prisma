@@ -22,9 +22,10 @@ model User {
 }
 
 model Message {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   body      String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  readAt    DateTime? // ✅ null = unread, timestamp = read
 
   senderId    Int
   recipientId Int

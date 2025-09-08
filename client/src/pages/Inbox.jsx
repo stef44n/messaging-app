@@ -40,9 +40,14 @@ export default function Inbox() {
                             <p className="font-semibold">
                                 {conv.user.username}
                             </p>
-                            <p className="text-sm text-gray-600 truncate">
-                                {conv.lastMessage}
+                            <p className="text-sm text-gray-600">
+                                {conv.lastMessage?.slice(0, 40)}...
                             </p>
+                            {conv.unreadCount > 0 && (
+                                <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                    {conv.unreadCount}
+                                </span>
+                            )}
                         </Link>
                     </li>
                 ))}

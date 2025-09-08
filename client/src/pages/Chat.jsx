@@ -56,12 +56,17 @@ export default function Chat() {
                     <div
                         key={msg.id}
                         className={`p-2 rounded max-w-xs ${
-                            msg.senderId === user?.id
+                            msg.senderId === user.id
                                 ? "bg-blue-500 text-white self-end ml-auto"
                                 : "bg-gray-200 text-black"
                         }`}
                     >
-                        {msg.body}
+                        <p>{msg.body}</p>
+                        {msg.senderId === user.id && (
+                            <span className="text-xs ml-2">
+                                {msg.readAt ? "✅✅" : "✅"}
+                            </span>
+                        )}
                     </div>
                 ))}
             </div>
