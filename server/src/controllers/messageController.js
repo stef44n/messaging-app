@@ -78,7 +78,12 @@ export const getConversation = async (req, res) => {
             },
         });
 
-        res.json(messages);
+        // Map deleted messages -> placeholder
+        const safeMessages = messages.map((msg) =>
+            msg.deletedAt ? { ...msg, body: "This message was deleted." } : msg
+        );
+
+        res.json({ messages: safeMessages });
     } catch (error) {
         console.error("❌ getConversation error:", error);
         res.status(500).json({ error: "Failed to fetch conversation" });
@@ -127,5 +132,37 @@ export const getInbox = async (req, res) => {
     } catch (error) {
         console.error("❌ getInbox error:", error);
         res.status(500).json({ error: "Failed to fetch inbox" });
+    }
+};
+
+// --- Delete message ---
+export const deleteMessage = async (req, res) => {
+    try {
+        const messageId = parseInt(req.params.messageId, 10);
+        const message = await prisma.message.findUnique({
+            where: { id: messageId },
+        });
+
+        if (!message) {
+            return res.status(404).json({ error: "Message not found" });
+        }
+        if (message.senderId !== req.user.userId) {
+            return res
+                .status(403)
+                .json({ error: "You can only delete your own messages" });
+        }
+
+        const updated = await prisma.message.update({
+            where: { id: messageId },
+            data: {
+                body: "[deleted]", // optionally overwrite body
+                deletedAt: new Date(),
+            },
+        });
+
+        res.json({ success: true, message: updated });
+    } catch (error) {
+        console.error("❌ deleteMessage error:", error);
+        res.status(500).json({ error: "Failed to delete message" });
     }
 };

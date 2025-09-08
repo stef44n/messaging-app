@@ -17,3 +17,8 @@ export const sendMessage = async (recipientId, body) => {
     const res = await api.post(`/messages/${recipientId}`, { body });
     return res.data; // ✅ now it's the message object
 };
+
+export const deleteMessage = async (messageId) => {
+    const res = await api.delete(`/messages/${messageId}`);
+    return res.data;
+};

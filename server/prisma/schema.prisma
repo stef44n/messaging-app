@@ -25,7 +25,9 @@ model Message {
   id        Int       @id @default(autoincrement())
   body      String
   createdAt DateTime  @default(now())
-  readAt    DateTime? // ✅ null = unread, timestamp = read
+  readAt    DateTime?
+
+  deletedAt DateTime? // ✅ null = active, timestamp = deleted
 
   senderId    Int
   recipientId Int
