@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import {
     getConversation,
@@ -8,16 +8,46 @@ import {
 import { useAuth } from "../context/AuthContext";
 
 export default function Chat() {
-    const { userId } = useParams(); // recipient’s id
-    const { user } = useAuth(); // current logged-in user
+    const { userId } = useParams();
+    const { user } = useAuth();
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
+    const [recipient, setRecipient] = useState(null);
+    const messagesEndRef = useRef(null);
+    const lastMessageIdRef = useRef(null); // 👈 track last message
 
     // Fetch conversation
     const fetchMessages = async () => {
         try {
             const data = await getConversation(userId);
-            setMessages(data.messages || []); // ✅ grab the array
+            const newMessages = data.messages || [];
+
+            // If there's a new message since last fetch → scroll
+            if (
+                newMessages.length > 0 &&
+                newMessages[newMessages.length - 1].id !==
+                    lastMessageIdRef.current
+            ) {
+                lastMessageIdRef.current =
+                    newMessages[newMessages.length - 1].id;
+                setMessages(newMessages);
+                // Auto-scroll only when new message arrives
+                setTimeout(() => {
+                    messagesEndRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                    });
+                }, 50);
+            } else {
+                setMessages(newMessages);
+            }
+
+            if (newMessages.length > 0) {
+                const otherUser =
+                    newMessages[0].sender.id === user.id
+                        ? newMessages[0].recipient
+                        : newMessages[0].sender;
+                setRecipient(otherUser);
+            }
         } catch (err) {
             console.error("Failed to fetch conversation:", err);
             setMessages([]);
@@ -38,10 +68,15 @@ export default function Chat() {
 
         try {
             const newMsg = await sendMessage(userId, input);
+            setMessages((prev) => [...prev, newMsg]);
 
-            setMessages((prev) => [...prev, newMsg]); // ✅ use returned message
-
+            lastMessageIdRef.current = newMsg.id; // track last message
             setInput("");
+
+            // Scroll on send
+            setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, 50);
         } catch (err) {
             console.error("Failed to send message:", err);
         }
@@ -62,13 +97,15 @@ export default function Chat() {
 
     return (
         <div className="max-w-md mx-auto p-6 flex flex-col h-screen">
-            <h1 className="text-2xl font-bold mb-4">Chat with User {userId}</h1>
+            <h1 className="text-2xl font-bold mb-4">
+                {recipient ? `Chat with ${recipient.username}` : "Chat"}
+            </h1>
 
-            <div className="flex-1 overflow-y-auto border p-3 rounded bg-gray-50 space-y-2">
+            <div className="flex-1 overflow-y-auto border p-3 rounded bg-gray-50 space-y-3">
                 {(!messages || messages.length === 0) && (
                     <p>No messages yet.</p>
                 )}
-                {messages?.map((msg) => {
+                {messages.map((msg) => {
                     const isMe = msg.senderId === user.id;
                     const isRead = !!msg.readAt;
                     const isDeleted = !!msg.deletedAt;
@@ -82,21 +119,28 @@ export default function Chat() {
                                     : "bg-gray-200 text-black"
                             }`}
                         >
-                            {/* Message body */}
                             <p className={isDeleted ? "italic opacity-70" : ""}>
                                 {isDeleted
                                     ? "This message was deleted"
                                     : msg.body}
                             </p>
 
-                            {/* Sent/Read ticks (only if not deleted) */}
-                            {isMe && !isDeleted && (
-                                <span className="text-xs block mt-1 text-right opacity-70">
-                                    {isRead ? "✅✅ Read" : "✅ Sent"}
+                            <div
+                                className={`flex items-center gap-1 mt-1 text-xs opacity-70 ${
+                                    isMe ? "justify-end" : "justify-start"
+                                }`}
+                            >
+                                <span>
+                                    {new Date(msg.createdAt).toLocaleTimeString(
+                                        [],
+                                        { hour: "2-digit", minute: "2-digit" }
+                                    )}
                                 </span>
-                            )}
+                                {isMe && !isDeleted && (
+                                    <span>{isRead ? "✅✅" : "✅"}</span>
+                                )}
+                            </div>
 
-                            {/* Delete button (only for sender & not already deleted) */}
                             {isMe && !isDeleted && (
                                 <button
                                     onClick={() => handleDelete(msg.id)}
@@ -109,6 +153,7 @@ export default function Chat() {
                         </div>
                     );
                 })}
+                <div ref={messagesEndRef} />
             </div>
 
             <form onSubmit={handleSend} className="flex mt-3">
