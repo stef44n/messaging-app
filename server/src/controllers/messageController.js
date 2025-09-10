@@ -73,8 +73,12 @@ export const getConversation = async (req, res) => {
             },
             orderBy: { createdAt: "asc" },
             include: {
-                sender: { select: { id: true, username: true } },
-                recipient: { select: { id: true, username: true } },
+                sender: {
+                    select: { id: true, username: true, avatarUrl: true },
+                },
+                recipient: {
+                    select: { id: true, username: true, avatarUrl: true },
+                },
             },
         });
 
@@ -102,8 +106,12 @@ export const getInbox = async (req, res) => {
             },
             orderBy: { createdAt: "desc" },
             include: {
-                sender: { select: { id: true, username: true } },
-                recipient: { select: { id: true, username: true } },
+                sender: {
+                    select: { id: true, username: true, avatarUrl: true },
+                },
+                recipient: {
+                    select: { id: true, username: true, avatarUrl: true },
+                },
             },
         });
 
