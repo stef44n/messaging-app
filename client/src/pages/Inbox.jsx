@@ -52,8 +52,8 @@ export default function Inbox() {
                                 <p className="font-semibold">
                                     {conv.user.username}
                                 </p>
-                                <p className="text-sm text-gray-600 truncate">
-                                    {conv.lastMessage}
+                                <p className="text-sm text-gray-600">
+                                    {conv.lastMessage?.slice(0, 32)}
                                 </p>
                             </div>
                             <span

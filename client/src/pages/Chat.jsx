@@ -95,6 +95,26 @@ export default function Chat() {
         }
     };
 
+    function formatMessage(text) {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.split(urlRegex).map((part, i) => {
+            if (urlRegex.test(part)) {
+                return (
+                    <a
+                        key={i}
+                        href={part}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-300 underline break-words"
+                    >
+                        {part}
+                    </a>
+                );
+            }
+            return part;
+        });
+    }
+
     return (
         <div className="max-w-md mx-auto p-6 flex flex-col h-screen">
             <h1 className="text-2xl font-bold mb-4">
@@ -119,10 +139,14 @@ export default function Chat() {
                                     : "bg-gray-200 text-black"
                             }`}
                         >
-                            <p className={isDeleted ? "italic opacity-70" : ""}>
+                            <p
+                                className={`${
+                                    isDeleted ? "italic opacity-70" : ""
+                                } break-words whitespace-pre-wrap`}
+                            >
                                 {isDeleted
                                     ? "This message was deleted"
-                                    : msg.body}
+                                    : formatMessage(msg.body)}
                             </p>
 
                             <div
