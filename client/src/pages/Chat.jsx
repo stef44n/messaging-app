@@ -154,6 +154,23 @@ export default function Chat() {
                     const isRead = !!msg.readAt;
                     const isDeleted = !!msg.deletedAt;
 
+                    // track long press timeout
+                    let longPressTimeout;
+
+                    const handleTouchStart = () => {
+                        if (isMe && !isDeleted) {
+                            longPressTimeout = setTimeout(() => {
+                                if (window.confirm("Delete this message?")) {
+                                    handleDelete(msg.id);
+                                }
+                            }, 600); // 600ms = long press
+                        }
+                    };
+
+                    const handleTouchEnd = () => {
+                        clearTimeout(longPressTimeout);
+                    };
+
                     return (
                         <div
                             key={msg.id || msg.createdAt}
@@ -162,6 +179,8 @@ export default function Chat() {
                                     ? "bg-blue-500 text-white self-end ml-auto"
                                     : "bg-gray-200 text-black"
                             }`}
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={handleTouchEnd}
                         >
                             <p
                                 className={`${
@@ -181,7 +200,10 @@ export default function Chat() {
                                 <span>
                                     {new Date(msg.createdAt).toLocaleTimeString(
                                         [],
-                                        { hour: "2-digit", minute: "2-digit" }
+                                        {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        }
                                     )}
                                 </span>
                                 {isMe && !isDeleted && (
@@ -189,18 +211,23 @@ export default function Chat() {
                                 )}
                             </div>
 
+                            {/* Desktop delete button (still visible on hover) */}
                             {isMe && !isDeleted && (
-                                <button
-                                    onClick={() => handleDelete(msg.id)}
-                                    className="absolute top-1 right-1 text-xs text-red-300 opacity-0 group-hover:opacity-100 transition"
-                                    title="Delete message"
-                                >
-                                    ❌
-                                </button>
+                                <>
+                                    {/* Desktop delete button (hidden on mobile) */}
+                                    <button
+                                        onClick={() => handleDelete(msg.id)}
+                                        className="hidden sm:block absolute top-1 right-1 text-xs text-red-300 opacity-0 group-hover:opacity-100 transition"
+                                        title="Delete message"
+                                    >
+                                        ❌
+                                    </button>
+                                </>
                             )}
                         </div>
                     );
                 })}
+
                 <div ref={messagesEndRef} />
             </div>
 
