@@ -96,23 +96,47 @@ export default function Chat() {
     };
 
     function formatMessage(text) {
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-        return text.split(urlRegex).map((part, i) => {
-            if (urlRegex.test(part)) {
-                return (
-                    <a
-                        key={i}
-                        href={part}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-300 underline break-words"
-                    >
-                        {part}
-                    </a>
-                );
+        // Matches http(s), www., or plain domain-like strings
+        const urlRegex =
+            /((https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9-]+\.[a-zA-Z]{2,}[^\s]*))/gi;
+
+        const parts = [];
+        let lastIndex = 0;
+
+        text.replace(urlRegex, (match, _1, _2, _3, _4, offset) => {
+            // Add any text before this match
+            if (lastIndex < offset) {
+                parts.push(text.slice(lastIndex, offset));
             }
-            return part;
+
+            // Normalize href
+            let href = match;
+            if (!/^https?:\/\//i.test(href)) {
+                href = "https://" + href;
+            }
+
+            // Push link
+            parts.push(
+                <a
+                    key={offset}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-300 underline break-words"
+                >
+                    {match}
+                </a>
+            );
+
+            lastIndex = offset + match.length;
         });
+
+        // Add remaining text after the last match
+        if (lastIndex < text.length) {
+            parts.push(text.slice(lastIndex));
+        }
+
+        return parts;
     }
 
     return (
