@@ -15,7 +15,11 @@ export default function Navbar() {
     return (
         <nav className="bg-blue-600 text-white px-6 py-3 shadow-md">
             <div className="max-w-6xl mx-auto flex items-center justify-between">
-                <Link to="/" className="text-xl font-bold">
+                <Link
+                    to="/"
+                    className="text-xl font-bold"
+                    onClick={() => setMenuOpen(false)}
+                >
                     MessagingApp
                 </Link>
 
@@ -93,6 +97,7 @@ export default function Navbar() {
                     <Link
                         to="/"
                         className="block py-2 px-3 rounded hover:bg-blue-500"
+                        onClick={() => setMenuOpen(!menuOpen)}
                     >
                         Home
                     </Link>
@@ -102,18 +107,31 @@ export default function Navbar() {
                             <Link
                                 to="/profile"
                                 className="block py-2 px-3 rounded hover:bg-blue-500"
+                                onClick={() => setMenuOpen(!menuOpen)}
                             >
                                 Profile
                             </Link>
                             <Link
+                                to="/new-chat"
+                                className="block py-2 px-3 rounded hover:bg-blue-500"
+                                onClick={() => setMenuOpen(!menuOpen)}
+                            >
+                                New Chat
+                            </Link>
+                            <Link
                                 to="/inbox"
                                 className="block py-2 px-3 rounded hover:bg-blue-500"
+                                onClick={() => setMenuOpen(!menuOpen)}
                             >
                                 Messages
                             </Link>
                             <button
-                                onClick={handleLogout}
-                                className="bg-red-500 px-3 py-2 rounded hover:bg-red-600 text-left"
+                                // onClick={handleLogout}
+                                className="bg-red-500 px-3 py-2 rounded hover:bg-red-600"
+                                onClick={() => {
+                                    setMenuOpen(!menuOpen);
+                                    handleLogout();
+                                }}
                             >
                                 Logout
                             </button>
@@ -123,12 +141,14 @@ export default function Navbar() {
                             <Link
                                 to="/login"
                                 className="block py-2 px-3 rounded hover:bg-blue-500"
+                                onClick={() => setMenuOpen(!menuOpen)}
                             >
                                 Login
                             </Link>
                             <Link
                                 to="/signup"
                                 className="block py-2 px-3 rounded hover:bg-blue-500"
+                                onClick={() => setMenuOpen(!menuOpen)}
                             >
                                 Sign Up
                             </Link>
