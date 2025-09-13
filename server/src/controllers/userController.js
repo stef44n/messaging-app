@@ -12,7 +12,7 @@ export const searchUsers = async (req, res) => {
             where: {
                 username: { contains: q, mode: "insensitive" },
             },
-            select: { id: true, username: true, email: true },
+            select: { id: true, username: true, email: true, avatarUrl: true },
             take: 10, // limit results
         });
 

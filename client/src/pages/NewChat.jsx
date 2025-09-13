@@ -18,41 +18,65 @@ export default function NewChat() {
     };
 
     return (
-        <div className="max-w-md mx-auto p-6">
-            <h1 className="text-2xl font-bold mb-4">Start New Chat</h1>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 py-10">
+            <div className="w-full max-w-lg bg-white shadow-lg rounded-2xl p-6 sm:p-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-center text-blue-600 mb-6">
+                    Start New Chat
+                </h1>
 
-            <form onSubmit={handleSearch} className="flex gap-2 mb-4">
-                <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search by username"
-                    className="flex-1 border rounded p-2"
-                />
-                <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 rounded"
+                {/* Search form */}
+                <form
+                    onSubmit={handleSearch}
+                    className="flex flex-col sm:flex-row gap-3 mb-6"
                 >
-                    Search
-                </button>
-            </form>
-
-            <ul className="space-y-2">
-                {results.length === 0 && query && <p>No users found.</p>}
-                {results.map((user) => (
-                    <li
-                        key={user.id}
-                        className="border p-2 rounded hover:bg-gray-100"
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search by username"
+                        className="flex-1 border rounded-lg p-3 focus:ring-2 focus:ring-blue-400"
+                    />
+                    <button
+                        type="submit"
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-lg shadow transition"
                     >
-                        <Link to={`/chat/${user.id}`} className="block">
-                            <p className="font-semibold">{user.username}</p>
-                            <p className="text-sm text-gray-500">
-                                {user.email}
-                            </p>
+                        Search
+                    </button>
+                </form>
+
+                {/* Results */}
+                <div className="space-y-3">
+                    {results.length === 0 && query && (
+                        <p className="text-center text-gray-500">
+                            No users found.
+                        </p>
+                    )}
+                    {results.map((user) => (
+                        <Link
+                            key={user.id}
+                            to={`/chat/${user.id}`}
+                            className="flex items-center gap-4 p-4 border rounded-xl hover:bg-gray-50 transition"
+                        >
+                            <img
+                                src={
+                                    user.avatarUrl ||
+                                    "https://api.dicebear.com/9.x/thumbs/svg?seed=Random"
+                                }
+                                alt={user.username}
+                                className="w-12 h-12 rounded-full object-cover"
+                            />
+                            <div>
+                                <p className="font-semibold text-gray-800">
+                                    {user.username}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    {user.email}
+                                </p>
+                            </div>
                         </Link>
-                    </li>
-                ))}
-            </ul>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
