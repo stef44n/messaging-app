@@ -52,28 +52,38 @@ export default function NewChat() {
                         </p>
                     )}
                     {results.map((user) => (
-                        <Link
+                        <div
                             key={user.id}
-                            to={`/chat/${user.id}`}
-                            className="flex items-center gap-4 p-4 border rounded-xl hover:bg-gray-50 transition"
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border rounded-xl hover:bg-gray-50 transition"
                         >
-                            <img
-                                src={
-                                    user.avatarUrl ||
-                                    "https://api.dicebear.com/9.x/thumbs/svg?seed=Random"
-                                }
-                                alt={user.username}
-                                className="w-12 h-12 rounded-full object-cover"
-                            />
-                            <div>
-                                <p className="font-semibold text-gray-800">
-                                    {user.username}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                    {user.email}
-                                </p>
+                            {/* User Info */}
+                            <div className="flex items-center gap-4">
+                                <img
+                                    src={
+                                        user.avatarUrl ||
+                                        "https://api.dicebear.com/9.x/thumbs/svg?seed=Random"
+                                    }
+                                    alt={user.username}
+                                    className="w-12 h-12 rounded-full object-cover"
+                                />
+                                <div className="overflow-hidden">
+                                    <p className="font-semibold text-gray-800 truncate">
+                                        {user.username}
+                                    </p>
+                                    <p className="text-sm text-gray-500 truncate">
+                                        {user.email}
+                                    </p>
+                                </div>
                             </div>
-                        </Link>
+
+                            {/* Button */}
+                            <Link
+                                to={`/chat/${user.id}`}
+                                className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-lg shadow transition text-center"
+                            >
+                                Start Chat
+                            </Link>
+                        </div>
                     ))}
                 </div>
             </div>
