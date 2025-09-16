@@ -6,6 +6,7 @@ import {
     deleteMessage,
 } from "../services/messages";
 import { useAuth } from "../context/AuthContext";
+import { useErrorHandler } from "../hooks/useErrorHandler";
 
 export default function Chat() {
     const { userId } = useParams();
@@ -15,6 +16,7 @@ export default function Chat() {
     const [recipient, setRecipient] = useState(null);
     const messagesEndRef = useRef(null);
     const lastMessageIdRef = useRef(null); // 👈 track last message
+    const handleError = useErrorHandler();
 
     // Fetch conversation
     const fetchMessages = async () => {
@@ -49,7 +51,7 @@ export default function Chat() {
                 setRecipient(otherUser);
             }
         } catch (err) {
-            console.error("Failed to fetch conversation:", err);
+            handleError(err, "Failed to fetch conversation");
             setMessages([]);
         }
     };
@@ -78,7 +80,7 @@ export default function Chat() {
                 messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
             }, 50);
         } catch (err) {
-            console.error("Failed to send message:", err);
+            handleError(err, "Failed to send message");
         }
     };
 
@@ -91,7 +93,7 @@ export default function Chat() {
                 )
             );
         } catch (err) {
-            console.error("Failed to delete message:", err);
+            handleError(err, "Failed to delete message");
         }
     };
 

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getInbox } from "../services/messages";
+import { useErrorHandler } from "../hooks/useErrorHandler";
 
 export default function Inbox() {
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
+    const handleError = useErrorHandler();
 
     useEffect(() => {
         const fetchInbox = async () => {
@@ -12,7 +14,7 @@ export default function Inbox() {
                 const data = await getInbox();
                 setConversations(data);
             } catch (err) {
-                console.error(err);
+                handleError(err);
             } finally {
                 setLoading(false);
             }

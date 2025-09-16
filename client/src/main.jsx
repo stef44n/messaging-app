@@ -13,6 +13,8 @@ import Chat from "./pages/Chat";
 import NewChat from "./pages/NewChat";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Loader from "./components/Loader";
+import { Toaster } from "react-hot-toast";
+import { ErrorProvider } from "./hooks/useErrorHandler";
 
 function PrivateRoute({ children }) {
     const { token, loading } = useAuth();
@@ -29,64 +31,67 @@ function RedirectIfAuth({ children }) {
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
         <AuthProvider>
-            <BrowserRouter>
-                <Navbar />
-                <Routes>
-                    <Route path="/" element={<App />} />
+            <ErrorProvider>
+                <BrowserRouter>
+                    <Navbar />
+                    <Routes>
+                        <Route path="/" element={<App />} />
 
-                    {/* Auth routes */}
-                    <Route
-                        path="/login"
-                        element={
-                            <RedirectIfAuth>
-                                <Login />
-                            </RedirectIfAuth>
-                        }
-                    />
-                    <Route
-                        path="/signup"
-                        element={
-                            <RedirectIfAuth>
-                                <Signup />
-                            </RedirectIfAuth>
-                        }
-                    />
+                        {/* Auth routes */}
+                        <Route
+                            path="/login"
+                            element={
+                                <RedirectIfAuth>
+                                    <Login />
+                                </RedirectIfAuth>
+                            }
+                        />
+                        <Route
+                            path="/signup"
+                            element={
+                                <RedirectIfAuth>
+                                    <Signup />
+                                </RedirectIfAuth>
+                            }
+                        />
 
-                    {/* Protected routes */}
-                    <Route
-                        path="/profile"
-                        element={
-                            <PrivateRoute>
-                                <Profile />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/inbox"
-                        element={
-                            <PrivateRoute>
-                                <Inbox />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/chat/:userId"
-                        element={
-                            <PrivateRoute>
-                                <Chat />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/new-chat"
-                        element={
-                            <PrivateRoute>
-                                <NewChat />
-                            </PrivateRoute>
-                        }
-                    />
-                </Routes>
-            </BrowserRouter>
+                        {/* Protected routes */}
+                        <Route
+                            path="/profile"
+                            element={
+                                <PrivateRoute>
+                                    <Profile />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/inbox"
+                            element={
+                                <PrivateRoute>
+                                    <Inbox />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/chat/:userId"
+                            element={
+                                <PrivateRoute>
+                                    <Chat />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/new-chat"
+                            element={
+                                <PrivateRoute>
+                                    <NewChat />
+                                </PrivateRoute>
+                            }
+                        />
+                    </Routes>
+                </BrowserRouter>
+                <Toaster position="top-center" reverseOrder={false} />
+            </ErrorProvider>
         </AuthProvider>
     </React.StrictMode>
 );

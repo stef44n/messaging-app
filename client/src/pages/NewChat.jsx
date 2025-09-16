@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { searchUsers } from "../services/users";
 import { Link } from "react-router-dom";
+import { useErrorHandler } from "../hooks/useErrorHandler";
 
 export default function NewChat() {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
+    const handleError = useErrorHandler();
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -13,7 +15,7 @@ export default function NewChat() {
             const data = await searchUsers(query);
             setResults(data.users);
         } catch (err) {
-            console.error("Search failed:", err);
+            handleError(err, "Search failed. Please try again.");
         }
     };
 
