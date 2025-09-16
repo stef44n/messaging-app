@@ -1,25 +1,30 @@
 import { useEffect, useState } from "react";
 import { getProfile, updateProfile } from "../services/auth";
+import { useFeedbackHandler } from "../hooks/useFeedbackHandler";
 
 export default function Profile() {
     const [user, setUser] = useState(null);
     const [form, setForm] = useState({ username: "", bio: "", avatarUrl: "" });
     const [editing, setEditing] = useState(false);
     const [errors, setErrors] = useState({});
-    const [success, setSuccess] = useState("");
+    const { handleError, handleSuccess } = useFeedbackHandler();
 
     useEffect(() => {
         const fetchProfile = async () => {
-            const data = await getProfile();
-            setUser(data.user);
-            setForm({
-                username: data.user.username || "",
-                bio: data.user.bio || "",
-                avatarUrl: data.user.avatarUrl || "",
-            });
+            try {
+                const data = await getProfile();
+                setUser(data.user);
+                setForm({
+                    username: data.user.username || "",
+                    bio: data.user.bio || "",
+                    avatarUrl: data.user.avatarUrl || "",
+                });
+            } catch (err) {
+                handleError(err, "Failed to load profile");
+            }
         };
         fetchProfile();
-    }, []);
+    }, [handleError]);
 
     const validate = () => {
         const newErrors = {};
@@ -37,7 +42,6 @@ export default function Profile() {
     };
 
     const handleSave = async () => {
-        setSuccess("");
         if (!validate()) return;
 
         try {
@@ -45,10 +49,9 @@ export default function Profile() {
             setUser(data.user);
             setEditing(false);
             setErrors({});
-            setSuccess("Profile updated successfully ✅");
+            handleSuccess("Profile updated successfully ✅");
         } catch (err) {
-            console.error(err);
-            setErrors({ api: err.response?.data?.error || "Update failed" });
+            handleError(err, "Profile update failed");
         }
     };
 
@@ -60,15 +63,6 @@ export default function Profile() {
                 <h1 className="text-2xl sm:text-3xl font-bold text-center text-blue-600 mb-6">
                     Profile
                 </h1>
-
-                {errors.api && (
-                    <p className="text-red-600 text-center mb-3">
-                        {errors.api}
-                    </p>
-                )}
-                {success && (
-                    <p className="text-green-600 text-center mb-3">{success}</p>
-                )}
 
                 {!editing ? (
                     <div className="text-center">

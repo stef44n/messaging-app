@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getInbox } from "../services/messages";
-import { useErrorHandler } from "../hooks/useErrorHandler";
+import { useFeedbackHandler } from "../hooks/useFeedbackHandler";
 
 export default function Inbox() {
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
-    const handleError = useErrorHandler();
+    const handleError = useFeedbackHandler();
 
     useEffect(() => {
         const fetchInbox = async () => {

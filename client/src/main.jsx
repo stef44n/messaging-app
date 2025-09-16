@@ -14,7 +14,7 @@ import NewChat from "./pages/NewChat";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Loader from "./components/Loader";
 import { Toaster } from "react-hot-toast";
-import { ErrorProvider } from "./hooks/useErrorHandler";
+import { FeedbackProvider } from "./hooks/useFeedbackHandler";
 
 function PrivateRoute({ children }) {
     const { token, loading } = useAuth();
@@ -31,7 +31,7 @@ function RedirectIfAuth({ children }) {
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
         <AuthProvider>
-            <ErrorProvider>
+            <FeedbackProvider>
                 <BrowserRouter>
                     <Navbar />
                     <Routes>
@@ -91,7 +91,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                     </Routes>
                 </BrowserRouter>
                 <Toaster position="top-center" reverseOrder={false} />
-            </ErrorProvider>
+            </FeedbackProvider>
         </AuthProvider>
     </React.StrictMode>
 );

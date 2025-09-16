@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { searchUsers } from "../services/users";
 import { Link } from "react-router-dom";
-import { useErrorHandler } from "../hooks/useErrorHandler";
+import { useFeedbackHandler } from "../hooks/useFeedbackHandler";
 
 export default function NewChat() {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
-    const handleError = useErrorHandler();
+    const handleError = useFeedbackHandler();
 
     const handleSearch = async (e) => {
         e.preventDefault();

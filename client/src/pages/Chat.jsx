@@ -6,7 +6,7 @@ import {
     deleteMessage,
 } from "../services/messages";
 import { useAuth } from "../context/AuthContext";
-import { useErrorHandler } from "../hooks/useErrorHandler";
+import { useFeedbackHandler } from "../hooks/useFeedbackHandler";
 
 export default function Chat() {
     const { userId } = useParams();
@@ -16,7 +16,7 @@ export default function Chat() {
     const [recipient, setRecipient] = useState(null);
     const messagesEndRef = useRef(null);
     const lastMessageIdRef = useRef(null); // 👈 track last message
-    const handleError = useErrorHandler();
+    const handleError = useFeedbackHandler();
 
     // Fetch conversation
     const fetchMessages = async () => {
