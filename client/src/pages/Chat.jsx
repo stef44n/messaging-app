@@ -15,7 +15,7 @@ export default function Chat() {
     const [input, setInput] = useState("");
     const [recipient, setRecipient] = useState(null);
     const messagesEndRef = useRef(null);
-    const lastMessageIdRef = useRef(null); // 👈 track last message
+    const lastMessageIdRef = useRef(null);
     const handleError = useFeedbackHandler();
 
     // Fetch conversation
@@ -24,7 +24,6 @@ export default function Chat() {
             const data = await getConversation(userId);
             const newMessages = data.messages || [];
 
-            // If there's a new message since last fetch → scroll
             if (
                 newMessages.length > 0 &&
                 newMessages[newMessages.length - 1].id !==
@@ -33,7 +32,6 @@ export default function Chat() {
                 lastMessageIdRef.current =
                     newMessages[newMessages.length - 1].id;
                 setMessages(newMessages);
-                // Auto-scroll only when new message arrives
                 setTimeout(() => {
                     messagesEndRef.current?.scrollIntoView({
                         behavior: "smooth",
@@ -72,10 +70,9 @@ export default function Chat() {
             const newMsg = await sendMessage(userId, input);
             setMessages((prev) => [...prev, newMsg]);
 
-            lastMessageIdRef.current = newMsg.id; // track last message
+            lastMessageIdRef.current = newMsg.id;
             setInput("");
 
-            // Scroll on send
             setTimeout(() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
             }, 50);
@@ -98,7 +95,6 @@ export default function Chat() {
     };
 
     function formatMessage(text) {
-        // Matches http(s), www., or plain domain-like strings
         const urlRegex =
             /((https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9-]+\.[a-zA-Z]{2,}[^\s]*))/gi;
 
@@ -106,18 +102,15 @@ export default function Chat() {
         let lastIndex = 0;
 
         text.replace(urlRegex, (match, _1, _2, _3, _4, offset) => {
-            // Add any text before this match
             if (lastIndex < offset) {
                 parts.push(text.slice(lastIndex, offset));
             }
 
-            // Normalize href
             let href = match;
             if (!/^https?:\/\//i.test(href)) {
                 href = "https://" + href;
             }
 
-            // Push link
             parts.push(
                 <a
                     key={offset}
@@ -133,7 +126,6 @@ export default function Chat() {
             lastIndex = offset + match.length;
         });
 
-        // Add remaining text after the last match
         if (lastIndex < text.length) {
             parts.push(text.slice(lastIndex));
         }
@@ -156,7 +148,6 @@ export default function Chat() {
                     const isRead = !!msg.readAt;
                     const isDeleted = !!msg.deletedAt;
 
-                    // track long press timeout
                     let longPressTimeout;
 
                     const handleTouchStart = () => {
@@ -165,7 +156,7 @@ export default function Chat() {
                                 if (window.confirm("Delete this message?")) {
                                     handleDelete(msg.id);
                                 }
-                            }, 600); // 600ms = long press
+                            }, 600);
                         }
                     };
 
@@ -213,18 +204,14 @@ export default function Chat() {
                                 )}
                             </div>
 
-                            {/* Desktop delete button (still visible on hover) */}
                             {isMe && !isDeleted && (
-                                <>
-                                    {/* Desktop delete button (hidden on mobile) */}
-                                    <button
-                                        onClick={() => handleDelete(msg.id)}
-                                        className="hidden sm:block absolute top-1 right-1 text-xs text-red-300 opacity-0 group-hover:opacity-100 transition"
-                                        title="Delete message"
-                                    >
-                                        ❌
-                                    </button>
-                                </>
+                                <button
+                                    onClick={() => handleDelete(msg.id)}
+                                    className="hidden sm:block absolute top-1 right-1 text-xs text-red-300 opacity-0 group-hover:opacity-100 transition"
+                                    title="Delete message"
+                                >
+                                    ❌
+                                </button>
                             )}
                         </div>
                     );

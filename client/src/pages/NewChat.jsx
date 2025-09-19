@@ -6,7 +6,7 @@ import { useFeedbackHandler } from "../hooks/useFeedbackHandler";
 export default function NewChat() {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
-    const handleError = useFeedbackHandler();
+    const { handleError } = useFeedbackHandler();
 
     const handleSearch = async (e) => {
         e.preventDefault();

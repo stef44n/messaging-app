@@ -6,7 +6,7 @@ import { useFeedbackHandler } from "../hooks/useFeedbackHandler";
 export default function Inbox() {
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
-    const handleError = useFeedbackHandler();
+    const { handleError } = useFeedbackHandler();
 
     useEffect(() => {
         const fetchInbox = async () => {
@@ -14,13 +14,13 @@ export default function Inbox() {
                 const data = await getInbox();
                 setConversations(data);
             } catch (err) {
-                handleError(err);
+                handleError(err, "Failed to load inbox");
             } finally {
                 setLoading(false);
             }
         };
         fetchInbox();
-    }, []);
+    }, [handleError]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 py-10">
