@@ -7,6 +7,7 @@ import {
 } from "../services/messages";
 import { useAuth } from "../context/AuthContext";
 import { useFeedbackHandler } from "../hooks/useFeedbackHandler";
+import Loader from "../components/Loader"; // 👈 import your loader
 
 export default function Chat() {
     const { userId } = useParams();
@@ -14,6 +15,7 @@ export default function Chat() {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [recipient, setRecipient] = useState(null);
+    const [loading, setLoading] = useState(true); // 👈 add loading
     const messagesEndRef = useRef(null);
     const lastMessageIdRef = useRef(null);
     const handleError = useFeedbackHandler();
@@ -21,6 +23,7 @@ export default function Chat() {
     // Fetch conversation
     const fetchMessages = async () => {
         try {
+            setLoading(true); // start loading
             const data = await getConversation(userId);
             const newMessages = data.messages || [];
 
@@ -51,6 +54,8 @@ export default function Chat() {
         } catch (err) {
             handleError(err, "Failed to fetch conversation");
             setMessages([]);
+        } finally {
+            setLoading(false); // stop loading
         }
     };
 
@@ -131,6 +136,10 @@ export default function Chat() {
         }
 
         return parts;
+    }
+
+    if (loading) {
+        return <Loader />; // 👈 full-screen spinner
     }
 
     return (

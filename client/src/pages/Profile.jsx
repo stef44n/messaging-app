@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
 import { getProfile, updateProfile } from "../services/auth";
 import { useFeedbackHandler } from "../hooks/useFeedbackHandler";
+import Loader from "../components/Loader"; // 👈 import loader
 
 export default function Profile() {
     const [user, setUser] = useState(null);
     const [form, setForm] = useState({ username: "", bio: "", avatarUrl: "" });
     const [editing, setEditing] = useState(false);
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(true); // 👈 new loading state
     const { handleError, handleSuccess } = useFeedbackHandler();
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
+                setLoading(true);
                 const data = await getProfile();
                 setUser(data.user);
                 setForm({
@@ -21,6 +24,8 @@ export default function Profile() {
                 });
             } catch (err) {
                 handleError(err, "Failed to load profile");
+            } finally {
+                setLoading(false);
             }
         };
         fetchProfile();
@@ -55,7 +60,8 @@ export default function Profile() {
         }
     };
 
-    if (!user) return <p className="text-center mt-10">Loading...</p>;
+    // 👇 show loader while fetching profile
+    if (loading) return <Loader />;
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 py-10">
