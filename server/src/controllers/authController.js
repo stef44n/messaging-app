@@ -43,40 +43,68 @@ export const signup = async (req, res) => {
 // --- Login ---
 export const login = async (req, res) => {
     try {
-        console.log("🔹 Login request body:", req.body);
-
         const { email, password } = req.body || {};
-
         if (!email || !password) {
-            console.log(
-                "⚠️ Missing email or password (likely StrictMode double render in dev)"
-            );
             return res.status(400).json({ error: "Invalid email or password" });
         }
-
-        console.log("✅ Login attempt with:", email);
 
         const user = await prisma.user.findUnique({ where: { email } });
-
-        if (!user) {
+        if (!user)
             return res.status(400).json({ error: "Invalid email or password" });
-        }
 
         const isMatch = await bcrypt.compare(password, user.passwordHash);
-        if (!isMatch) {
+        if (!isMatch)
             return res.status(400).json({ error: "Invalid email or password" });
-        }
 
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-            expiresIn: "1h",
+        // Access token (short lived)
+        const accessToken = jwt.sign({ userId: user.id }, JWT_SECRET, {
+            expiresIn: "15m",
         });
 
+        // Refresh token (long lived)
+        const refreshToken = jwt.sign({ userId: user.id }, JWT_SECRET, {
+            expiresIn: "7d",
+        });
+
+        // Optional: persist refreshToken in DB for revocation control
+        // await prisma.user.update({ where: { id: user.id }, data: { refreshToken } });
+
         res.json({
-            token,
+            accessToken,
+            refreshToken,
             user: { id: user.id, username: user.username, email: user.email },
         });
     } catch (err) {
         console.error("❌ Login error:", err);
         res.status(500).json({ error: "Server error during login" });
+    }
+};
+
+// --- Refresh ---
+export const refresh = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            return res.status(401).json({ error: "No refresh token" });
+        }
+
+        jwt.verify(refreshToken, JWT_SECRET, (err, decoded) => {
+            if (err) {
+                return res
+                    .status(403)
+                    .json({ error: "Invalid or expired refresh token" });
+            }
+
+            const newAccessToken = jwt.sign(
+                { userId: decoded.userId },
+                JWT_SECRET,
+                { expiresIn: "15m" }
+            );
+
+            res.json({ accessToken: newAccessToken });
+        });
+    } catch (err) {
+        console.error("❌ Refresh error:", err);
+        res.status(500).json({ error: "Failed to refresh token" });
     }
 };

@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
-    const { token, user, logout } = useAuth();
+    const { accessToken, user, logout } = useAuth(); // ⬅️ use accessToken
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -27,7 +27,7 @@ export default function Navbar() {
                     <Link to="/" className="hover:underline">
                         Home
                     </Link>
-                    {token ? (
+                    {accessToken ? ( // ⬅️ check accessToken instead of token
                         <>
                             <span className="font-medium">
                                 👋 Hi, {user?.username || "User"}
@@ -38,7 +38,6 @@ export default function Navbar() {
                             <Link to="/new-chat" className="hover:underline">
                                 New Chat
                             </Link>
-
                             <Link to="/inbox" className="hover:underline">
                                 Messages
                             </Link>
@@ -102,7 +101,7 @@ export default function Navbar() {
                         Home
                     </Link>
 
-                    {token ? (
+                    {accessToken ? ( // ⬅️ same change here
                         <>
                             <Link
                                 to="/profile"
@@ -126,7 +125,6 @@ export default function Navbar() {
                                 Messages
                             </Link>
                             <button
-                                // onClick={handleLogout}
                                 className="bg-red-500 px-3 py-2 rounded hover:bg-red-600"
                                 onClick={() => {
                                     setMenuOpen(!menuOpen);

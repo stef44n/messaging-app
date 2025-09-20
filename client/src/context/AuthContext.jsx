@@ -8,35 +8,70 @@ import {
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-    const [token, setToken] = useState(localStorage.getItem("token"));
+    const [accessToken, setAccessToken] = useState(
+        localStorage.getItem("accessToken")
+    );
+    const [refreshToken, setRefreshToken] = useState(
+        localStorage.getItem("refreshToken")
+    );
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
+    // --- Check profile on mount / token change ---
     useEffect(() => {
-        if (token) {
-            getProfile()
-                .then((data) => setUser(data.user))
-                .catch(() => setUser(null));
-        } else {
-            setUser(null);
-        }
-    }, [token]);
+        const initAuth = async () => {
+            if (accessToken) {
+                try {
+                    const data = await getProfile();
+                    setUser(data.user);
+                } catch (err) {
+                    console.error("Failed to fetch profile:", err);
+                    setUser(null);
+                }
+            } else {
+                setUser(null);
+            }
+            setLoading(false);
+        };
+        initAuth();
+    }, [accessToken]);
 
+    // --- Login ---
     const login = async (credentials) => {
         const data = await apiLogin(credentials);
-        setToken(data.token);
-        localStorage.setItem("token", data.token);
+
+        setAccessToken(data.accessToken);
+        setRefreshToken(data.refreshToken);
+
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+
         const profile = await getProfile();
         setUser(profile.user);
     };
 
+    // --- Logout ---
     const logout = () => {
         apiLogout();
-        setToken(null);
+        setAccessToken(null);
+        setRefreshToken(null);
         setUser(null);
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
     };
 
     return (
-        <AuthContext.Provider value={{ token, user, login, logout }}>
+        <AuthContext.Provider
+            value={{
+                accessToken,
+                refreshToken,
+                setAccessToken, // 👈 used by axios interceptor after refresh
+                user,
+                login,
+                logout,
+                loading,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
