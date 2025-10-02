@@ -1,14 +1,14 @@
 import "./App.css";
-import { Link } from "react-router-dom";
-import { logout } from "./services/auth";
+import { Link, useNavigate } from "react-router-dom"; // 👈 import useNavigate
 import { useAuth } from "./context/AuthContext";
 
 export default function App() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate(); // 👈 get navigate function
 
     const handleLogout = () => {
         logout();
-        window.location.href = "/login";
+        navigate("/login"); // 👈 client-side redirect (no full reload)
     };
 
     return (

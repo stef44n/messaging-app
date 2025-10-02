@@ -15,7 +15,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Loader from "./components/Loader";
 import { Toaster } from "react-hot-toast";
 import { FeedbackProvider } from "./hooks/useFeedbackHandler";
-import { useAuthInterceptor } from "./hooks/useAuthInterceptor";
+import InterceptorProvider from "./hooks/InterceptorProvider";
 
 // --- Helper components ---
 function PrivateRoute({ children }) {
@@ -30,18 +30,11 @@ function RedirectIfAuth({ children }) {
     return accessToken ? <Navigate to="/inbox" /> : children;
 }
 
-// --- Wrapper to activate interceptor globally ---
-function InterceptorInitializer({ children }) {
-    const { accessToken, refreshToken, setAccessToken, logout } = useAuth();
-    useAuthInterceptor({ accessToken, refreshToken, setAccessToken, logout });
-    return children;
-}
-
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
         <AuthProvider>
             <FeedbackProvider>
-                <InterceptorInitializer>
+                <InterceptorProvider>
                     <BrowserRouter>
                         <Navbar />
                         <Routes>
@@ -101,7 +94,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                         </Routes>
                     </BrowserRouter>
                     <Toaster position="top-center" reverseOrder={false} />
-                </InterceptorInitializer>
+                </InterceptorProvider>
             </FeedbackProvider>
         </AuthProvider>
     </React.StrictMode>

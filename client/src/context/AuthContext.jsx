@@ -4,6 +4,7 @@ import {
     login as apiLogin,
     logout as apiLogout,
 } from "../services/auth";
+import { useAuthInterceptor } from "../hooks/useAuthInterceptor";
 
 const AuthContext = createContext();
 
@@ -60,14 +61,22 @@ export function AuthProvider({ children }) {
         localStorage.removeItem("refreshToken");
     };
 
+    useAuthInterceptor({
+        accessToken,
+        refreshToken,
+        setAccessToken,
+        logout,
+    });
+
     return (
         <AuthContext.Provider
             value={{
                 accessToken,
+                setAccessToken,
                 refreshToken,
-                setAccessToken, // 👈 used by axios interceptor after refresh
+                setRefreshToken,
                 user,
-                login,
+                setUser,
                 logout,
                 loading,
             }}

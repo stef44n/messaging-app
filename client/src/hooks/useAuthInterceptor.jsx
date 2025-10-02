@@ -1,10 +1,5 @@
 import { useEffect, useRef } from "react";
-import axios from "axios";
 import api from "../services/api";
-
-// const api = axios.create({
-//     baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-// });
 
 export const useAuthInterceptor = ({
     accessToken,
@@ -16,8 +11,16 @@ export const useAuthInterceptor = ({
 
     // Attach interceptors
     useEffect(() => {
+        console.log("🔌 Setting up interceptors with token:", accessToken);
+
         const reqInterceptor = api.interceptors.request.use(
             (config) => {
+                console.log(
+                    "📤 Request:",
+                    config.url,
+                    "Auth:",
+                    config.headers.Authorization
+                );
                 if (accessToken) {
                     config.headers.Authorization = `Bearer ${accessToken}`;
                 }
@@ -27,18 +30,41 @@ export const useAuthInterceptor = ({
         );
 
         const resInterceptor = api.interceptors.response.use(
-            (response) => response,
+            (response) => {
+                console.log(
+                    "📥 Response:",
+                    response.config.url,
+                    response.status
+                );
+                return response;
+            },
             async (error) => {
+                console.warn(
+                    "❗ Response error caught",
+                    error?.response?.status
+                );
                 const originalRequest = error.config;
+
                 if (error.response?.status === 401 && !originalRequest._retry) {
+                    console.warn(
+                        "⚠️ Interceptor caught 401, attempting refresh..."
+                    );
                     originalRequest._retry = true;
+
                     try {
-                        const { data } = await axios.post(
+                        const { data } = await api.post(
                             `${api.defaults.baseURL}/auth/refresh`,
                             { refreshToken }
                         );
+
+                        console.log(
+                            "✅ Refresh success, new accessToken:",
+                            data.accessToken
+                        );
+
                         setAccessToken(data.accessToken);
                         localStorage.setItem("accessToken", data.accessToken);
+
                         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
                         return api(originalRequest);
                     } catch (err) {
@@ -46,6 +72,7 @@ export const useAuthInterceptor = ({
                         logout();
                     }
                 }
+
                 return Promise.reject(error);
             }
         );
@@ -65,7 +92,7 @@ export const useAuthInterceptor = ({
             // Refresh 5 minutes before expiry (assuming 1h lifetime)
             refreshTimeout.current = setTimeout(async () => {
                 try {
-                    const { data } = await axios.post(
+                    const { data } = await api.post(
                         `${api.defaults.baseURL}/auth/refresh`,
                         { refreshToken }
                     );
@@ -75,7 +102,7 @@ export const useAuthInterceptor = ({
                     console.error("❌ Auto-refresh failed");
                     logout();
                 }
-            }, 55 * 60 * 1000); // 55 min
+            }, 14 * 60 * 1000); // 14 min
         };
 
         // Schedule refresh initially
