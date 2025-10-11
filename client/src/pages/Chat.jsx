@@ -59,10 +59,10 @@ export default function Chat() {
         }
     };
 
-    // Load messages on mount + poll every 5s
+    // Load messages on mount + poll every 60s
     useEffect(() => {
         fetchMessages();
-        const interval = setInterval(fetchMessages, 5000);
+        const interval = setInterval(fetchMessages, 60000);
         return () => clearInterval(interval);
     }, [userId]);
 
