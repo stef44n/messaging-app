@@ -9,7 +9,11 @@ import userRoutes from "./src/routes/userRoutes.js";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true })); // (optional, for form data)
 
