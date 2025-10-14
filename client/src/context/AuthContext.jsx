@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // --- Check profile on mount / token change ---
+    // --- Fetch profile on mount / token change ---
     useEffect(() => {
         const initAuth = async () => {
             if (accessToken) {
@@ -37,18 +37,20 @@ export function AuthProvider({ children }) {
         initAuth();
     }, [accessToken]);
 
-    // --- Login ---
-    const login = async (credentials) => {
+    // --- Login via credentials (API call) ---
+    const handleLogin = async (credentials) => {
         const data = await apiLogin(credentials);
+        setSession(data.accessToken, data.refreshToken, data.user);
+    };
 
-        setAccessToken(data.accessToken);
-        setRefreshToken(data.refreshToken);
-
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-
-        const profile = await getProfile();
-        setUser(profile.user);
+    // --- Directly set session (used after Login.jsx) ---
+    const setSession = (access, refresh, userData) => {
+        setAccessToken(access);
+        setRefreshToken(refresh);
+        setUser(userData);
+        localStorage.setItem("accessToken", access);
+        localStorage.setItem("refreshToken", refresh);
+        localStorage.setItem("user", JSON.stringify(userData));
     };
 
     // --- Logout ---
@@ -59,8 +61,10 @@ export function AuthProvider({ children }) {
         setUser(null);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
     };
 
+    // --- Attach interceptor ---
     useAuthInterceptor({
         accessToken,
         refreshToken,
@@ -72,13 +76,12 @@ export function AuthProvider({ children }) {
         <AuthContext.Provider
             value={{
                 accessToken,
-                setAccessToken,
                 refreshToken,
-                setRefreshToken,
                 user,
-                setUser,
-                logout,
                 loading,
+                setSession,
+                handleLogin,
+                logout,
             }}
         >
             {children}
